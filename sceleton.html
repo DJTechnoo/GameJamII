@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<canvas id="canvas" width="1024" height="512"></canvas>
+<script>
+
+const CANVAS = document.getElementById("canvas");
+const C = CANVAS.getContext("2d");
+const W = CANVAS.width; // window WIDTH
+const H = CANVAS.height; // window HEIGHT
+
+function drawRect(x, y, w, h, col){ // Draw Rectangle
+    C.fillStyle = col;
+    C.fillRect(x, y, w, h);
+}
+
+function clear(col){
+    drawRect(0, 0, W, H, col);
+}
+
+
+// RECURSIVE MAIN GAMELOOP
+Block = function(x, y, s, col){
+    this.x = x;
+    this.y = y;
+    this.s = s;
+    this.col = col;
+
+    this.draw = function(){
+        drawRect(this.x, this.y, this.s, this.s, this.col);
+    }
+
+    this.update = function(){
+        this.x += 10;
+    }
+}
+
+
+
+var blocks = [
+    new Block(40, 200, 20, "cyan"),
+    new Block(100, 300, 10, "red"),
+];
+
+
+
+
+function gameLoop(){
+    clear("rgba(0, 0, 0, 1.0)");
+    for(var i in blocks){
+        blocks[i].update();
+        blocks[i].draw();
+    }
+    requestAnimationFrame(gameLoop);
+}
+
+
+
+requestAnimationFrame(gameLoop);
+
+
+</script>
+</html>
