@@ -1,0 +1,12 @@
+Plan: 
+
+You're a zombie who's continously rotting, you need to feast on humans to survive. Humans consists of both harmless civilians who pose no threat and dangerous humans with weapons, IE Police/Military
+Your zombie afflicition is not contagious.
+
+The game will be divided into levels, with increasing difficulity, a level ends when you've eaten all the civilians. 
+As each level ends you get upgrade points to upgrade your zombie, the points granted by this is based on how many hostile humans you've eaten.
+
+One gains points by surviving, with bonus points for how fast you've cleared the level, how many hostile humans you've eaten and how fast you cleared it.
+
+Defeat condition is having one's HP reduced to 0, it reduces both over time and as one is shot. 
+You beat the game by defeating all levels while maintaining HP above 0. 
