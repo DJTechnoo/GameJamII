@@ -87,6 +87,14 @@ function makeBlood(arr, x, y){
         arr.push(new Particle(x, y));
 }
 
+
+function generateCivilians(n){
+    var arr = [];
+    for(var i = 0; i < n; i++)
+        arr.push(new Civilian(Math.random()*(W-200)+100, Math.random()* (H-200)+100, 20, "pink"))
+    return arr;
+}
+
 // ------------------------------------End helper functions 
 
 
@@ -252,13 +260,7 @@ Sound = function sound(src) {
 // Game setup   ----------------------------
 
 var player = new Player(200, 200, 20, "cyan");
-var civilians = [
-    new Civilian(Math.random()*(W-200)+100, Math.random()* (H-200)+100, 20, "pink"),
-    new Civilian(Math.random()*(W-200)+100, Math.random()* (H-200)+100, 20, "pink"),
-    new Civilian(Math.random()*(W-200)+100, Math.random()* (H-200)+100, 20, "pink"),
-    new Civilian(Math.random()*(W-200)+100, Math.random()* (H-200)+100, 20, "pink"),
-    new Civilian(Math.random()*(W-200)+100, Math.random()* (H-200)+100, 20, "pink")
-];
+var civilians = generateCivilians(30);
 
 var blood = [];
 var health = new Healthbar(100, "green");
