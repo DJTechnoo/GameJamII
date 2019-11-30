@@ -6,6 +6,8 @@
 FINAL Idea = Zombie evolves, and people get stronger, topdown
 */
 
+	var ctx = canvas.getContext("2d");
+	
 const CANVAS = document.getElementById("canvas");
 const C = CANVAS.getContext("2d");
 const W = CANVAS.width; // window WIDTH
@@ -61,6 +63,14 @@ function walkInDirection(x, y, spd, dir){
 function cameraFollow(target){
     C.translate(W/2-target.x, H/2-target.y);
 }
+	
+	function drawScore() {
+    ctx.font = "16px Arial";
+    ctx.fillStyle = "#0095DD";
+    ctx.fillText("Score: "+score, 150, 30);
+}
+	
+	
 // ------------------------------------End helper functions 
 
 
@@ -138,7 +148,9 @@ Healthbar = function(len, col) {
 		drawRect(15, 15, player.maxLife + 10, 30, "cyan");
 		drawRect(20,20, player.life, 20, this.col)
 	}
-}
+	this.death = function () {
+		if (player.life == 0){ alert("game over");	}	
+}}
 
 Sound = function sound(src) {
   this.sound = document.createElement("audio");
@@ -169,9 +181,13 @@ var civilians = [
     new Civilian(Math.random()*(W-200)+100, Math.random()* (H-200)+100, 20, "pink")
 ];
 var health = new Healthbar(100, "green");
-// var sound = new Sound("hitSound.mp3");	// mySound.play(); to play when player hits/eats object
+var score = 0;
+	// var sound = new Sound("hitSound.mp3");	// mySound.play(); to play when player hits/eats object
 var music = new Sound("assets/wargod.mp3");
 music.play();
+	
+
+	
 //---------------------------- End game setup
 
 // RECURSIVE MAIN GAMELOOP
@@ -180,32 +196,34 @@ function gameLoop(){
 
     // ALL UPDATE FUNCTION MUST COME BELOW THIS---------------
     player.update();
-
-    for(var i in civilians)
+	for(var i in civilians)
         civilians[i].update();
-
-
-
 	
+	
+	
+	score++;
 	
     // ---------------------------------------------END updates
-
+	drawScore();				// Draws score top left corner
     C.save();                   // Needed for camera
     cameraFollow(player);       // Camera targets player
 	
     // ALL DRAW FUNCTION MUST COME BELOW THIS------------------
-
+	
     // demonstrate the draw functions
     player.draw();
-    for(var i in civilians)
+    for(var i in civilians)	
         civilians[i].draw();
     drawRect(500, 200, 400, 20, "green");
     drawRectRotation(200, 500, 300, 10, "blue", 9);
-
+	
+    
     //------------------ --------------------------END Drawings
     C.restore();        // Needed for camera
     //  HUD STUFF----------------------------------------------
+
 	health.draw();
+	health.death();
     // ----------------------------------- End HUD
     requestAnimationFrame(gameLoop);
 }
