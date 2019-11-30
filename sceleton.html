@@ -123,9 +123,9 @@ function makeBullet(x, y, vx, vy){
 Bullet = function(x, y, xv, yv){
     this.x = x;
     this.y = y;
-    this.xv = xv;
-    this.yv = yv;
-    this.s = 5;
+    this.xv = xv + Math.random()*0.2-0.1;
+    this.yv = yv + Math.random()*0.2-0.1;
+    this.s = Math.random()*5+2;
 
     this.draw = function(){
         drawRect(this.x, this.y, this.s, this.s, "yellow");
