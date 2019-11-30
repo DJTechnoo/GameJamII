@@ -76,6 +76,7 @@ Player = function(x, y, s, col){
     this.turnSpd = 0.05;
     this.walkSpd = 0.5;
     this.col = col;
+	
 
     this.draw = function(){
         drawRectRotation(this.x, this.y, this.s, this.s, this.col, this.direction);
@@ -93,11 +94,22 @@ Player = function(x, y, s, col){
     }
 }
 
+Healthbar = function(len, col) {
+	this.col = col;
+	this.len = len
+	
+	this.draw = function()  {
+		drawRect(15, 15, len + 10, 30, "cyan");
+		drawRect(20,20, this.len, 20, this.col)
+	}
+}
+
 // -----------------------------End game classes 
 
 // Game setup   ----------------------------
 
 var player = new Player(200, 200, 20, "cyan");
+var health = new Healthbar(100, "green");
 
 
 //---------------------------- End game setup
@@ -125,7 +137,7 @@ function gameLoop(){
     //------------------ --------------------------END Drawings
     C.restore();        // Needed for camera
     //  HUD STUFF----------------------------------------------
-     
+	health.draw();
     // ----------------------------------- End HUD
     requestAnimationFrame(gameLoop);
 }
