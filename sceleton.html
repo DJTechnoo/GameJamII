@@ -11,48 +11,117 @@ const C = CANVAS.getContext("2d");
 const W = CANVAS.width; // window WIDTH
 const H = CANVAS.height; // window HEIGHT
 
+// Controller stuff-------------------------------
+document.addEventListener("keydown", keyboard);
+document.addEventListener("keyup", keyboard);
+
+var key = {
+    w:false,
+    a:false,
+    s:false,
+    d:false
+};
+
+function keyboard(evt){
+    state = (evt.type == "keydown")? true:false;
+    switch(evt.key){
+        case 'w': key.w = state; break;
+        case 'a': key.a = state; break;
+        case 's': key.s = state; break;
+        case 'd': key.d = state; break;
+    }
+}
+//-------------------------------- End controller stuff 
+
+// Helper functions------------------------------
+
 function drawRect(x, y, w, h, col){ // Draw Rectangle
     C.fillStyle = col;
     C.fillRect(x, y, w, h);
+}
+
+function drawRectRotation(x, y, w, h, col, r){
+    C.save();
+    C.translate(x, y);
+    C.rotate(r);
+    drawRect(-w/2, -h/2, w, h, col);
+    C.restore();
 }
 
 function clear(col){
     drawRect(0, 0, W, H, col);
 }
 
+function walkInDirection(x, y, spd, dir){
+    x += Math.cos(dir)*spd;
+    y += Math.sin(dir)*spd;
+    return [x, y];
+}
 
-// RECURSIVE MAIN GAMELOOP
-Block = function(x, y, s, col){
-    this.x = x;
-    this.y = y;
-    this.s = s;
-    this.col = col;
+// ------------------------------------End helper functions 
 
-    this.draw = function(){
-        drawRect(this.x, this.y, this.s, this.s, this.col);
-    }
 
-    this.update = function(){
-        this.x += 10;
-    }
+// Game classes -------------------------------
+
+function cameraFollow(target){
+    C.translate(W/2-target.x, H/2-target.y);
 }
 
 
+Player = function(x, y, s, col){
+    this.x = x;
+    this.y = y;
+    this.s = s;
+    this.rotation = 9;
+    this.rotationSpd = 0.05;
+    this.walkSpd = 0.5;
+    this.col = col;
 
-var blocks = [
-    new Block(40, 200, 20, "cyan"),
-    new Block(100, 300, 10, "red"),
-];
+    this.draw = function(){
+        drawRectRotation(this.x, this.y, this.s, this.s, this.col, this.rotation);
+    }
+
+    this.update = function(){
+        if(key.a) this.rotation -= this.rotationSpd;
+        if(key.d) this.rotation += this.rotationSpd;
+
+        var newDirection = [this.x, this.y];
+        if(key.w) newDirection = walkInDirection(this.x, this.y, this.walkSpd, this.rotation);
+        this.x = newDirection[0];
+        this.y = newDirection[1];
+        
+    }
+}
+
+// -----------------------------End game classes 
+
+// Game setup   ----------------------------
+
+var player = new Player(200, 200, 20, "cyan");
 
 
+//---------------------------- End game setup
 
-
+// RECURSIVE MAIN GAMELOOP
 function gameLoop(){
     clear("rgba(0, 0, 0, 1.0)");
-    for(var i in blocks){
-        blocks[i].update();
-        blocks[i].draw();
-    }
+
+    // ALL UPDATE FUNCTION MUST COME BELOW THIS---------------
+    player.update();
+
+    // ---------------------------------------------END updates
+    C.save();                   // Needed for camera
+    cameraFollow(player);       // Camera targets player
+
+    // ALL DRAW FUNCTION MUST COME BELOW THIS------------------
+
+    // demonstrate the draw functions
+    player.draw();
+    drawRect(500, 200, 400, 20, "green");
+    drawRectRotation(200, 500, 300, 10, "blue", 9);
+
+    //------------------ --------------------------END Drawings
+    C.restore();        // Needed for camera
     requestAnimationFrame(gameLoop);
 }
 
