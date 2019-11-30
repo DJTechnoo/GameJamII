@@ -6,7 +6,7 @@
 FINAL Idea = Zombie evolves, and people get stronger, topdown
 */
 
-	var ctx = canvas.getContext("2d");
+var ctx = canvas.getContext("2d");
 	
 const CANVAS = document.getElementById("canvas");
 const C = CANVAS.getContext("2d");
@@ -95,10 +95,50 @@ function generateCivilians(n){
     return arr;
 }
 
+function fireBulletsToward(o1, o2, spd){
+    var dx = o1.x - o2.x;
+    var dy = o1.y - o2.y;
+    var len = dist(o1, o2);
+    if(len != 0){
+        dx /= len;
+        dy /= len;
+    }
+
+    dx *= spd;
+    dy *= spd;
+    
+    makeBullet(o2.x, o2.y, dx, dy);
+}
+
+function makeBullet(x, y, vx, vy){
+    console.log(x);
+    bullets.push(new Bullet(x, y, vx, vy));
+}
+
 // ------------------------------------End helper functions 
 
 
 // Game classes -------------------------------
+
+Bullet = function(x, y, xv, yv){
+    this.x = x;
+    this.y = y;
+    this.xv = xv;
+    this.yv = yv;
+    this.s = 5;
+
+    this.draw = function(){
+        drawRect(this.x, this.y, this.s, this.s, "yellow");
+    }
+
+    this.update = function(){
+        this.x += this.xv;
+        this.y += this.yv;
+        this.s -= 0.01;
+    }
+}
+
+
 Civilian = function(x, y, s, col){
     this.x = x;
     this.y = y;
@@ -108,7 +148,7 @@ Civilian = function(x, y, s, col){
     this.turnSpd = 0.05;
     this.walkSpd = 0.2;
     this.turnTimer = 0;
-    this.turnThreshhold = Math.random()*200;
+    this.turnThreshhold = Math.random()*50;
     this.leftOrRight = 1;
     this.deathRadius = this.s*0.6;
     this.isDead = false;
@@ -130,7 +170,10 @@ Civilian = function(x, y, s, col){
         this.y = newDirection[1];
 
         var distanceToPlayer = dist(player, this);
-        if(distanceToPlayer < this.deathRadius)this.isDead = true;       
+        if(distanceToPlayer < this.deathRadius){
+            this.isDead = true;   
+            player.life += 15; 
+        }   
 
     }
 
@@ -147,26 +190,26 @@ Military = function(x, y, s, col){
     this.direction = 0;
     this.turnSpd = 0.05;
     this.walkSpd = 0.2;
-    this.turnTimer = 0;
-    this.turnThreshhold = Math.random()*200;
-    this.leftOrRight = 1;
+    this.shootTimer = 0;
+    this.fireRate = 0;
+    this.shootThreshhold = Math.random()*50;
     this.deathRadius = this.s*0.6;
 
     this.update = function(){
-        if(this.turnTimer < 200){
-            this.turnTimer += 1;
-            if(this.turnTimer < this.turnThreshhold)
-                this.direction += this.turnSpd*this.leftOrRight;
+        if(this.shootTimer < 200){
+            this.shootTimer += 1;
+            if(this.shootTimer < this.shootThreshhold){
+                if(this.fireRate > 5){
+                    fireBulletsToward(player, this, 1.5);
+                    this.fireRate = 0;
+                }
+                this.fireRate += 1;
+            }
         }
         else {
-            this.turnTimer = 0;
-            this.turnThreshhold = Math.random()*50;
-            this.leftOrRight = Math.floor(Math.random()*2-1);
+            this.shootTimer = 0;
+            this.shootThreshhold = Math.random()*50;
         }
-
-        var newDirection = walkInDirection(this.x, this.y, this.walkSpd, this.direction);
-        this.x = newDirection[0];
-        this.y = newDirection[1];
 
         var distanceToPlayer = dist(player, this);
         if(distanceToPlayer < this.deathRadius)this.col = "red";       
@@ -257,12 +300,63 @@ Sound = function sound(src) {
 
 // -----------------------------End game classes 
 
+// Game Functions --------------------------------
+function updateCivilians(){
+    for(var i = civilians.length-1; i >= 0; i--){
+        civilians[i].update();
+        if(civilians[i].isDead) {
+            makeBlood(blood, civilians[i].x, civilians[i].y);
+            civilians.splice(i, 1);
+        }
+    }
+}
+
+function updateBlood(){
+    for(var i = blood.length-1; i >= 0; i--){
+        blood[i].update();
+        if(blood[i].s < 0){
+            blood.splice(i,1);
+        }
+    }
+}
+
+function updateBullets(){
+    for(var i = bullets.length-1; i >= 0; i--){
+        bullets[i].update();
+        if(bullets[i].s < 0){
+          //  bullets.splice(i,1);
+        }
+    }
+}
+
+function drawCivilians(){
+    for(var i in civilians)	
+        civilians[i].draw();
+}
+
+
+function drawBlood(){
+    for(var i in blood){
+        blood[i].draw();
+    }
+}
+
+function drawBullets(){
+    for(var i in bullets){
+        bullets[i].draw();
+    }
+}
+
+// -----------------------------End Game functions
+
 // Game setup   ----------------------------
 
 var player = new Player(200, 200, 20, "cyan");
 var civilians = generateCivilians(30);
+var militaryBoy = new Military(300, 300, 20, "lightgreen");
 
 var blood = [];
+var bullets = [];
 var health = new Healthbar(100, "green");
 var score = 0;
 	// var sound = new Sound("hitSound.mp3");	// mySound.play(); to play when player hits/eats object
@@ -279,26 +373,14 @@ function gameLoop(){
 
     // ALL UPDATE FUNCTION MUST COME BELOW THIS---------------
     player.update();
-
-    for(var i = civilians.length-1; i >= 0; i--){
-        civilians[i].update();
-        if(civilians[i].isDead) {
-            makeBlood(blood, civilians[i].x, civilians[i].y);
-            civilians.splice(i, 1);
-        }
-    }
-
-    for(var i = blood.length-1; i >= 0; i--){
-        blood[i].update();
-        if(blood[i].s < 0){
-            blood.splice(i,1);
-        }
-    }
+    updateCivilians();
+    militaryBoy.update();
+    updateBlood();
+    updateBullets();
 
 	score++;
 	
     // ---------------------------------------------END updates
-	drawScore();				// Draws score top left corner
     C.save();                   // Needed for camera
     cameraFollow(player);       // Camera targets player
 	
@@ -306,22 +388,21 @@ function gameLoop(){
 	
     // demonstrate the draw functions
     player.draw();
-    for(var i in civilians)	
-        civilians[i].draw();
-
-    for(var i in blood){
-        blood[i].draw();
-    }
+    drawCivilians();
+    militaryBoy.draw();
+    drawBlood();
+    drawBullets();
     drawRect(500, 200, 400, 20, "green");
     drawRectRotation(200, 500, 300, 10, "blue", 9);
 	
     
     //------------------ --------------------------END Drawings
     C.restore();        // Needed for camera
-    //  HUD STUFF----------------------------------------------
 
+    //  HUD STUFF----------------------------------------------
+	drawScore();				// Draws score top left corner
 	health.draw();
-	health.death();
+	//health.death();
     // ----------------------------------- End HUD
     requestAnimationFrame(gameLoop);
 }
