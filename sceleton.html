@@ -106,14 +106,31 @@ Healthbar = function(len, col) {
 	}
 }
 
+Sound = function sound(src) {
+  this.sound = document.createElement("audio");
+  this.sound.src = src;
+  this.sound.setAttribute("preload", "auto");
+  this.sound.setAttribute("controls", "none");
+  this.sound.style.display = "none";
+  document.body.appendChild(this.sound);
+  this.play = function(){
+    this.sound.play();
+  }
+  this.stop = function(){
+    this.sound.pause();
+  }
+} 
+
+
 // -----------------------------End game classes 
 
 // Game setup   ----------------------------
 
 var player = new Player(200, 200, 20, "cyan");
 var health = new Healthbar(100, "green");
-
-
+// var sound = new Sound("hitSound.mp3");	// mySound.play(); to play when player hits/eats object
+var music = new Sound("assets/wargod.mp3");
+music.play();
 //---------------------------- End game setup
 
 // RECURSIVE MAIN GAMELOOP
@@ -122,13 +139,15 @@ function gameLoop(){
 
     // ALL UPDATE FUNCTION MUST COME BELOW THIS---------------
     player.update();
-    
 
+
+	
+	
     // ---------------------------------------------END updates
 
     C.save();                   // Needed for camera
     cameraFollow(player);       // Camera targets player
-
+	
     // ALL DRAW FUNCTION MUST COME BELOW THIS------------------
 
     // demonstrate the draw functions
