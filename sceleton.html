@@ -76,7 +76,8 @@ Player = function(x, y, s, col){
     this.turnSpd = 0.05;
     this.walkSpd = 0.5;
     this.col = col;
-
+    this.life = 100;
+    this.maxLife = 100;
     this.draw = function(){
         drawRectRotation(this.x, this.y, this.s, this.s, this.col, this.direction);
     }
@@ -89,7 +90,8 @@ Player = function(x, y, s, col){
         if(key.w) newDirection = walkInDirection(this.x, this.y, this.walkSpd, this.direction);
         this.x = newDirection[0];
         this.y = newDirection[1];
-        
+        if(this.life >0) this.life -= 0.5;
+        else this.life = 0;   
     }
 }
 
