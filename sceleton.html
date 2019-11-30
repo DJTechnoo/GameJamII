@@ -69,11 +69,56 @@ function dist(o1, o2){      // Vector operation, returns distance between two ob
     var len = Math.sqrt(dx*dx + dy*dy);
     return len;
 }
+
+function makeBlood(arr, x, y){
+    for(var i = 0; i < 10; i++)
+        arr.push(new Particle(x, y));
+}
 // ------------------------------------End helper functions 
 
 
 // Game classes -------------------------------
 Civilian = function(x, y, s, col){
+    this.x = x;
+    this.y = y;
+    this.s = s;
+    this.col = col;
+    this.direction = 0;
+    this.turnSpd = 0.05;
+    this.walkSpd = 0.2;
+    this.turnTimer = 0;
+    this.turnThreshhold = Math.random()*200;
+    this.leftOrRight = 1;
+    this.deathRadius = this.s*0.6;
+    this.isDead = false;
+
+    this.update = function(){
+        if(this.turnTimer < 200){
+            this.turnTimer += 1;
+            if(this.turnTimer < this.turnThreshhold)
+                this.direction += this.turnSpd*this.leftOrRight;
+        }
+        else {
+            this.turnTimer = 0;
+            this.turnThreshhold = Math.random()*50;
+            this.leftOrRight = Math.floor(Math.random()*2-1);
+        }
+
+        var newDirection = walkInDirection(this.x, this.y, this.walkSpd, this.direction);
+        this.x = newDirection[0];
+        this.y = newDirection[1];
+
+        var distanceToPlayer = dist(player, this);
+        if(distanceToPlayer < this.deathRadius)this.isDead = true;       
+
+    }
+
+    this.draw = function(){
+        drawRectRotation(this.x, this.y, this.s, this.s, this.col, this.direction);
+    }
+}
+
+Military = function(x, y, s, col){
     this.x = x;
     this.y = y;
     this.s = s;
@@ -111,6 +156,26 @@ Civilian = function(x, y, s, col){
         drawRectRotation(this.x, this.y, this.s, this.s, this.col, this.direction);
     }
 }
+
+Particle = function(x, y){
+    this.x = x;
+    this.y = y;
+    this.xv = Math.random()*1-0.5;
+    this.yv = Math.random()*1-0.5;
+    this.col = "red";
+    this.s = Math.random()*4+1;
+
+    this.update = function(){
+        this.x += this.xv;
+        this.y += this.yv;
+        if(this.s > 0) this.s -= 0.1;
+    }
+
+    this.draw = function(){
+        drawRect(this.x, this.y, this.s, this.s, this.col);
+    }
+}
+
 
 
 Player = function(x, y, s, col){
@@ -179,6 +244,8 @@ var civilians = [
     new Civilian(Math.random()*(W-200)+100, Math.random()* (H-200)+100, 20, "pink"),
     new Civilian(Math.random()*(W-200)+100, Math.random()* (H-200)+100, 20, "pink")
 ];
+
+var blood = [];
 var health = new Healthbar(100, "green");
 // var sound = new Sound("hitSound.mp3");	// mySound.play(); to play when player hits/eats object
 var music = new Sound("assets/wargod.mp3");
@@ -192,13 +259,21 @@ function gameLoop(){
     // ALL UPDATE FUNCTION MUST COME BELOW THIS---------------
     player.update();
 
-    for(var i in civilians)
+    for(var i = civilians.length-1; i >= 0; i--){
         civilians[i].update();
+        if(civilians[i].isDead) {
+            makeBlood(blood, civilians[i].x, civilians[i].y);
+            civilians.splice(i, 1);
+        }
+    }
 
+    for(var i = blood.length-1; i >= 0; i--){
+        blood[i].update();
+        if(blood[i].s < 0){
+            blood.splice(i,1);
+        }
+    }
 
-
-	
-	
     // ---------------------------------------------END updates
 
     C.save();                   // Needed for camera
@@ -210,6 +285,10 @@ function gameLoop(){
     player.draw();
     for(var i in civilians)
         civilians[i].draw();
+
+    for(var i in blood){
+        blood[i].draw();
+    }
     drawRect(500, 200, 400, 20, "green");
     drawRectRotation(200, 500, 300, 10, "blue", 9);
 
