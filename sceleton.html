@@ -61,6 +61,14 @@ function walkInDirection(x, y, spd, dir){
 function cameraFollow(target){
     C.translate(W/2-target.x, H/2-target.y);
 }
+
+function dist(o1, o2){      // Vector operation, returns distance between two objects
+    var dx = o1.x - o2.x;
+    var dy = o1.y - o2.y;
+
+    var len = Math.sqrt(dx*dx + dy*dy);
+    return len;
+}
 // ------------------------------------End helper functions 
 
 
@@ -76,6 +84,7 @@ Civilian = function(x, y, s, col){
     this.turnTimer = 0;
     this.turnThreshhold = Math.random()*200;
     this.leftOrRight = 1;
+    this.deathRadius = this.s*0.6;
 
     this.update = function(){
         if(this.turnTimer < 200){
@@ -92,7 +101,9 @@ Civilian = function(x, y, s, col){
         var newDirection = walkInDirection(this.x, this.y, this.walkSpd, this.direction);
         this.x = newDirection[0];
         this.y = newDirection[1];
-        
+
+        var distanceToPlayer = dist(player, this);
+        if(distanceToPlayer < this.deathRadius)this.col = "red";       
 
     }
 
