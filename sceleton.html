@@ -72,21 +72,21 @@ Player = function(x, y, s, col){
     this.x = x;
     this.y = y;
     this.s = s;
-    this.rotation = 9;
-    this.rotationSpd = 0.05;
+    this.direction = 9;
+    this.turnSpd = 0.05;
     this.walkSpd = 0.5;
     this.col = col;
 
     this.draw = function(){
-        drawRectRotation(this.x, this.y, this.s, this.s, this.col, this.rotation);
+        drawRectRotation(this.x, this.y, this.s, this.s, this.col, this.direction);
     }
 
     this.update = function(){
-        if(key.a) this.rotation -= this.rotationSpd;
-        if(key.d) this.rotation += this.rotationSpd;
+        if(key.a) this.direction -= this.turnSpd;
+        if(key.d) this.direction += this.turnSpd;
 
         var newDirection = [this.x, this.y];
-        if(key.w) newDirection = walkInDirection(this.x, this.y, this.walkSpd, this.rotation);
+        if(key.w) newDirection = walkInDirection(this.x, this.y, this.walkSpd, this.direction);
         this.x = newDirection[0];
         this.y = newDirection[1];
         
