@@ -65,7 +65,41 @@ function cameraFollow(target){
 
 
 // Game classes -------------------------------
+Civilian = function(x, y, s, col){
+    this.x = x;
+    this.y = y;
+    this.s = s;
+    this.col = col;
+    this.direction = 0;
+    this.turnSpd = 0.05;
+    this.walkSpd = 0.2;
+    this.turnTimer = 0;
+    this.turnThreshhold = Math.random()*200;
+    this.leftOrRight = 1;
 
+    this.update = function(){
+        if(this.turnTimer < 200){
+            this.turnTimer += 1;
+            if(this.turnTimer < this.turnThreshhold)
+                this.direction += this.turnSpd*this.leftOrRight;
+        }
+        else {
+            this.turnTimer = 0;
+            this.turnThreshhold = Math.random()*50;
+            this.leftOrRight = Math.floor(Math.random()*2-1);
+        }
+
+        var newDirection = walkInDirection(this.x, this.y, this.walkSpd, this.direction);
+        this.x = newDirection[0];
+        this.y = newDirection[1];
+        
+
+    }
+
+    this.draw = function(){
+        drawRectRotation(this.x, this.y, this.s, this.s, this.col, this.direction);
+    }
+}
 
 
 Player = function(x, y, s, col){
@@ -111,6 +145,13 @@ Healthbar = function(len, col) {
 // Game setup   ----------------------------
 
 var player = new Player(200, 200, 20, "cyan");
+var civilians = [
+    new Civilian(Math.random()*(W-200)+100, Math.random()* (H-200)+100, 20, "pink"),
+    new Civilian(Math.random()*(W-200)+100, Math.random()* (H-200)+100, 20, "pink"),
+    new Civilian(Math.random()*(W-200)+100, Math.random()* (H-200)+100, 20, "pink"),
+    new Civilian(Math.random()*(W-200)+100, Math.random()* (H-200)+100, 20, "pink"),
+    new Civilian(Math.random()*(W-200)+100, Math.random()* (H-200)+100, 20, "pink")
+];
 var health = new Healthbar(100, "green");
 
 
@@ -122,7 +163,8 @@ function gameLoop(){
 
     // ALL UPDATE FUNCTION MUST COME BELOW THIS---------------
     player.update();
-    
+    for(var i in civilians)
+        civilians[i].update();
 
     // ---------------------------------------------END updates
 
@@ -133,6 +175,8 @@ function gameLoop(){
 
     // demonstrate the draw functions
     player.draw();
+    for(var i in civilians)
+        civilians[i].draw();
     drawRect(500, 200, 400, 20, "green");
     drawRectRotation(200, 500, 300, 10, "blue", 9);
 
