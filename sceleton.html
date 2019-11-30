@@ -58,14 +58,14 @@ function walkInDirection(x, y, spd, dir){
     return [x, y];
 }
 
+function cameraFollow(target){
+    C.translate(W/2-target.x, H/2-target.y);
+}
 // ------------------------------------End helper functions 
 
 
 // Game classes -------------------------------
 
-function cameraFollow(target){
-    C.translate(W/2-target.x, H/2-target.y);
-}
 
 
 Player = function(x, y, s, col){
