@@ -91,7 +91,7 @@ Player = function(x, y, s, col){
         if(key.w) newDirection = walkInDirection(this.x, this.y, this.walkSpd, this.direction);
         this.x = newDirection[0];
         this.y = newDirection[1];
-        if(this.life >0) this.life -= 0.5;
+        if(this.life > 0) this.life -= 0.1;
         else this.life = 0;   
     }
 }
@@ -101,8 +101,8 @@ Healthbar = function(len, col) {
 	this.len = len
 	
 	this.draw = function()  {
-		drawRect(15, 15, len + 10, 30, "cyan");
-		drawRect(20,20, this.len, 20, this.col)
+		drawRect(15, 15, player.maxLife + 10, 30, "cyan");
+		drawRect(20,20, player.life, 20, this.col)
 	}
 }
 
