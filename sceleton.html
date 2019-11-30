@@ -6,6 +6,8 @@
 FINAL Idea = Zombie evolves, and people get stronger, topdown
 */
 
+	var ctx = canvas.getContext("2d");
+	
 const CANVAS = document.getElementById("canvas");
 const C = CANVAS.getContext("2d");
 const W = CANVAS.width; // window WIDTH
@@ -62,6 +64,15 @@ function cameraFollow(target){
     C.translate(W/2-target.x, H/2-target.y);
 }
 
+	
+	function drawScore() {
+    ctx.font = "16px Arial";
+    ctx.fillStyle = "#0095DD";
+    ctx.fillText("Score: "+score, 150, 30);
+}
+	
+	
+
 function dist(o1, o2){      // Vector operation, returns distance between two objects
     var dx = o1.x - o2.x;
     var dy = o1.y - o2.y;
@@ -70,10 +81,12 @@ function dist(o1, o2){      // Vector operation, returns distance between two ob
     return len;
 }
 
+
 function makeBlood(arr, x, y){
-    for(var i = 0; i < 10; i++)
+    for(var i = 0; i < 20; i++)
         arr.push(new Particle(x, y));
 }
+
 // ------------------------------------End helper functions 
 
 
@@ -160,15 +173,15 @@ Military = function(x, y, s, col){
 Particle = function(x, y){
     this.x = x;
     this.y = y;
-    this.xv = Math.random()*1-0.5;
-    this.yv = Math.random()*1-0.5;
+    this.xv = Math.random()*2-1;
+    this.yv = Math.random()*2-1;
     this.col = "red";
     this.s = Math.random()*4+1;
 
     this.update = function(){
         this.x += this.xv;
         this.y += this.yv;
-        if(this.s > 0) this.s -= 0.1;
+        if(this.s > 0) this.s -= 0.05;
     }
 
     this.draw = function(){
@@ -214,7 +227,9 @@ Healthbar = function(len, col) {
 		drawRect(15, 15, player.maxLife + 10, 30, "cyan");
 		drawRect(20,20, player.life, 20, this.col)
 	}
-}
+	this.death = function () {
+		if (player.life == 0){ alert("game over");	}	
+}}
 
 Sound = function sound(src) {
   this.sound = document.createElement("audio");
@@ -247,9 +262,13 @@ var civilians = [
 
 var blood = [];
 var health = new Healthbar(100, "green");
-// var sound = new Sound("hitSound.mp3");	// mySound.play(); to play when player hits/eats object
+var score = 0;
+	// var sound = new Sound("hitSound.mp3");	// mySound.play(); to play when player hits/eats object
 var music = new Sound("assets/wargod.mp3");
 music.play();
+	
+
+	
 //---------------------------- End game setup
 
 // RECURSIVE MAIN GAMELOOP
@@ -274,16 +293,18 @@ function gameLoop(){
         }
     }
 
+	score++;
+	
     // ---------------------------------------------END updates
-
+	drawScore();				// Draws score top left corner
     C.save();                   // Needed for camera
     cameraFollow(player);       // Camera targets player
 	
     // ALL DRAW FUNCTION MUST COME BELOW THIS------------------
-
+	
     // demonstrate the draw functions
     player.draw();
-    for(var i in civilians)
+    for(var i in civilians)	
         civilians[i].draw();
 
     for(var i in blood){
@@ -291,11 +312,14 @@ function gameLoop(){
     }
     drawRect(500, 200, 400, 20, "green");
     drawRectRotation(200, 500, 300, 10, "blue", 9);
-
+	
+    
     //------------------ --------------------------END Drawings
     C.restore();        // Needed for camera
     //  HUD STUFF----------------------------------------------
+
 	health.draw();
+	health.death();
     // ----------------------------------- End HUD
     requestAnimationFrame(gameLoop);
 }
