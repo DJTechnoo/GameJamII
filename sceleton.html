@@ -520,7 +520,9 @@ var blood = [];
 var bullets = [];
 var health = new Healthbar(100, "green");
 var score = 0;
-
+var active = false;
+var scoreReq = 999;
+	
 	// var sound = new Sound("hitSound.mp3");	// mySound.play(); to play when player hits/eats object
 var music = new Sound("assets/wargod.mp3");
 music.play();
@@ -535,40 +537,34 @@ var transitionImage = new Image();
 var button1 = new Image();
 var button2 = new Image();
 var button3 = new Image();
-
+var button4 = new Image();
+	
 bgImage.src = "assets/background.png";
 menuImage.src = "assets/menu.png";
 transitionImage.src = "assets/transition.png";
 button1.src = "assets/play.png";
 button2.src = "assets/set.png";
 button3.src = "assets/exit.png";	
-	
+button4.src = "assets/speed.png";
 //---------------------------- End game setup
 	
-function menuDraw () {
-    C.drawImage(menuImage, 0, 0);
-}
 		
 function backgroundDraw () {
     C.drawImage(bgImage, 0, 0);
 }
 
-function transitionDraw () {
-    C.drawImage(transitionImage, 0, 0);
-}
-	
 function menuLoop() {
 
 	console.log("omggg")
-	menuDraw ();
+	C.drawImage(menuImage, 0, 0);
 	C.drawImage(button1, 50, 100);
 	C.drawImage(button2, 50, 220);
 	C.drawImage(button3, 50, 340);
 	
-var buttonX = 50;
-var buttonY = 100;
-var buttonW = 200;
-var buttonH = 100;
+	var buttonX = 50;
+	var buttonY = 100;
+	var buttonW = 200;
+	var buttonH = 100;
 
 	canvas.addEventListener('click', function(event) {
   // Control that click event occurred within position of button
@@ -583,10 +579,38 @@ var buttonH = 100;
     
 	  console.log(event.x);
 	  player.playButtonHit();
-
+	  score = 0;
   }
-});
+	});
+}
+ function levelUp() { 
+	  C.drawImage(transitionImage, 0, 0);
+	 C.drawImage(button4, 500, 200);
+	 	
+	var buttonX = 500;
+	var buttonY = 200;
+	var buttonW = 200;
+	var buttonH = 100;
 
+	canvas.addEventListener('mouseup', function(event) {
+  	// Control that click event occurred within position of button
+  	// NOTE: This assumes canvas element is positioned at top left corner 
+  	if (
+    event.x > buttonX && 
+    event.x < buttonX + buttonW &&
+    event.y > buttonY && 
+    event.y < buttonY + buttonH
+  	) {
+    // Executes if button was clicked!
+    
+	player.walkSpd += 0.01;
+	active = false;
+	scoreReq += 1500;
+	console.log(scoreReq);
+  }
+ });
+	
+	
 	
 }
 	
@@ -598,46 +622,47 @@ function gameLoop(){
 		menuLoop();
 	}
 	else{
-    clear("rgba(0, 0, 0, 1.0)");
-	backgroundDraw();
-    // ALL UPDATE FUNCTION MUST COME BELOW THIS---------------
-    player.update();
-    updateCivilians();
-    militaryBoy.update();
-    updateBlood();
-    updateBullets();
+    	clear("rgba(0, 0, 0, 1.0)");
+		backgroundDraw();
+    	// ALL UPDATE FUNCTION MUST COME BELOW THIS---------------
+		player.update();
+		updateCivilians();
+		militaryBoy.update();
+		updateBlood();
+		updateBullets();
 
-	score++;
-	
-    // ---------------------------------------------END updates
-    C.save();                   // Needed for camera
-    cameraFollow(player);       // Camera targets player
-	
-    // ALL DRAW FUNCTION MUST COME BELOW THIS------------------
-	
-    // demonstrate the draw functions
-    player.draw();
-    drawCivilians();
-    militaryBoy.draw();
-    drawBlood();
-    drawBullets();
-    drawRect(500, 200, 400, 20, "green");
-    drawRectRotation(200, 500, 300, 10, "blue", 9);
-	
-    
-    //------------------ --------------------------END Drawings
-    C.restore();        // Needed for camera
+		score++;
 
-    //  HUD STUFF----------------------------------------------
-	drawScore();				// Draws score top left corner
-	health.draw();
-	//health.death();
-    // ----------------------------------- End HUD
-	
+		// ---------------------------------------------END updates
+		C.save();                   // Needed for camera
+		cameraFollow(player);       // Camera targets player
+
+		// ALL DRAW FUNCTION MUST COME BELOW THIS------------------
+
+		// demonstrate the draw functions
+		player.draw();
+		drawCivilians();
+		militaryBoy.draw();
+		drawBlood();
+		drawBullets();
+		drawRect(500, 200, 400, 20, "green");
+		drawRectRotation(200, 500, 300, 10, "blue", 9);
+
+
+		//------------------ --------------------------END Drawings
+		C.restore();        // Needed for camera
+
+		//  HUD STUFF----------------------------------------------
+		drawScore();				// Draws score top left corner
+		health.draw();
+		//health.death();
+		// ----------------------------------- End HUD
+		if(score == scoreReq) { active = true; }
+		if(active) { levelUp(); }
 	}
-	
-	requestAnimationFrame(gameLoop);
-					 
+	if (!active){
+		requestAnimationFrame(gameLoop);
+	}	 
 	
 }
 
