@@ -120,10 +120,82 @@ function makeBullet(x, y, vx, vy){
 
 // Game classes -------------------------------
 
+// Animation
+Sprite = function(path){
+    this.src = path;
+    this.img = new Image();
+    this.img.src = this.src;
+
+    this.draw = function(x, y, s, r){
+        C.save();
+        C.translate(x, y);
+        C.rotate(r);
+        C.drawImage(this.img, -s, -s, s*2, s*2);
+        C.restore();
+    }
+}
+
+Animations = function(){
+    this.idleSprites = [];
+    this.moveSprites = [];
+    this.attackSprites = [];
+
+    this.path = "./assets/sprites/zombie/";
+    this.currentSprites = this.idleSprites;
+    this.maxFrame = 16;
+    this.currentFrame = 0;
+    this.interval = 0;
+    this.threshhold = 5;
+
+    this.loadAnimations = function(){
+        var path = "";
+        for(var i = 0; i <= 16; i++){
+            path = this.path + "skeleton-idle_" + i+ ".png";
+            this.idleSprites.push(new Sprite(path));
+        }
+
+        for(var i = 0; i <= 16; i++){
+            path = this.path + "skeleton-move_" + i+ ".png";
+            this.moveSprites.push(new Sprite(path));
+        }
+
+        for(var i = 0; i <= 8; i++){
+            path = this.path + "skeleton-attack_" + i+ ".png";
+            this.attackSprites.push(new Sprite(path));
+        }
+    }
+
+    this.draw = function(x, y, s, r){
+        this.currentSprites[this.currentFrame].draw(x, y, s, r);
+    }
+
+    this.drawOne = function(k){
+        this.idleSprites[k].draw();
+    }
+
+    this.cycle = function(state){
+        switch(state){
+            case "idle": this.currentSprites = this.idleSprites; this.maxFrame = 16; break;
+            case "move": this.currentSprites = this.moveSprites; this.maxFrame = 16; break;
+            case "attack": this.currentSprites = this.attackSprites; this.maxFrame = 8; break;
+        }
+
+        
+        if(this.interval > this.threshhold){
+            this.currentFrame++;
+            this.interval = 0;
+        }
+        if(this.currentFrame > this.maxFrame) this.currentFrame = 0;
+        this.interval++;
+    }
+}
+// ---------------------- End animation
+
+
 Bullet = function(x, y, xv, yv){
     this.x = x;
     this.y = y;
-    this.xv = xv + Math.random()*0.2-0.1;
+    this.xv = xv + Math.random()*0.2-0.1; // With deviation, hence randomness added
     this.yv = yv + Math.random()*0.2-0.1;
     this.s = Math.random()*5+2;
 
@@ -252,21 +324,30 @@ Player = function(x, y, s, col){
     this.col = col;
     this.life = 100;
     this.maxLife = 100;
+    this.animation = new Animations();
+    this.animation.loadAnimations();
 
     this.draw = function(){
-        drawRectRotation(this.x, this.y, this.s, this.s, this.col, this.direction);
+        
+        this.animation.draw(this.x, this.y, this.s, this.direction);
     }
 
     this.update = function(){
+        var state = "idle";
         if(key.a) this.direction -= this.turnSpd;
         if(key.d) this.direction += this.turnSpd;
 
         var newDirection = [this.x, this.y];
-        if(key.w) newDirection = walkInDirection(this.x, this.y, this.walkSpd, this.direction);
+        if(key.w) {
+            state = "move";
+            newDirection = walkInDirection(this.x, this.y, this.walkSpd, this.direction);
+        }
         this.x = newDirection[0];
         this.y = newDirection[1];
         if(this.life > 0) this.life -= 0.1;
-        else this.life = 0;   
+        else this.life = 0;  
+
+        this.animation.cycle(state); 
     }
 }
 
