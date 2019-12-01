@@ -111,7 +111,7 @@ function fireBulletsToward(o1, o2, spd){
 }
 
 function makeBullet(x, y, vx, vy){
-    console.log(x);
+   
     bullets.push(new Bullet(x, y, vx, vy));
 }
 
@@ -121,6 +121,62 @@ function makeBullet(x, y, vx, vy){
 // Game classes -------------------------------
 
 // Animation
+
+HuamnSpriteSheet = function(){
+    this.img = new Image();
+    this.img.src = "./assets/sprites/human/walk.png";
+    this.s = 64;
+    this.xx = 0;
+    this.yy = 0;
+    this.currentFrame = 0;
+    this.interval = 0;
+    this.maxFrame = 7;
+    this.threshhold = 5;
+    this.arr = [
+        [{x:0, y:0}, {x:64, y:0}, {x:64*2, y:0}],
+        [{x:0, y:64}, {x:64, y:64}, {x:64*2, y:64}],
+        [{x:0, y:64*2}, {x:64, y:64*2}]
+    ];
+
+    this.cycles = [];
+
+    this.load = function(){
+        for(var i = 0; i < 3; i++){
+            for(var j = 0; j < this.arr[i].length; j++){
+                this.cycles.push(this.arr[i][j]);
+            }
+        }
+    }
+
+    this.cycle = function(){
+        if(this.interval > this.threshhold){
+            this.currentFrame++;
+            this.interval = 0;
+        }
+        if(this.currentFrame > this.maxFrame) this.currentFrame = 0;
+        this.interval++;
+    }
+
+    this.draw = function(x, y, s, r){
+        C.save();
+        C.translate(x, y);
+        C.rotate(r+ Math.PI/2);
+        
+        C.drawImage(
+            this.img, 
+            this.cycles[this.currentFrame].x, 
+            this.cycles[this.currentFrame].y,
+            this.s,
+            this.s,
+            -s/2,
+            -s/2,
+            s,
+            s
+        );
+        C.restore();
+    }
+}
+
 Sprite = function(path){
     this.src = path;
     this.img = new Image();
@@ -207,6 +263,12 @@ Bullet = function(x, y, xv, yv){
         this.x += this.xv;
         this.y += this.yv;
         this.s -= 0.01;
+        if(dist(player, this) < 15) {
+            makeBlood(blood, player.x, player.y);
+            if (this.s > 0) player.life -= 2;
+            this.s = 0;
+            console.log("HIT");
+        }
     }
 }
 
@@ -224,6 +286,8 @@ Civilian = function(x, y, s, col){
     this.leftOrRight = 1;
     this.deathRadius = this.s*0.6;
     this.isDead = false;
+    this.animation = new HuamnSpriteSheet();
+    this.animation.load();
 
     this.update = function(){
         if(this.turnTimer < 200){
@@ -246,11 +310,13 @@ Civilian = function(x, y, s, col){
             this.isDead = true;   
             player.life += 15; 
         }   
+        this.animation.cycle();
 
     }
 
     this.draw = function(){
-        drawRectRotation(this.x, this.y, this.s, this.s, this.col, this.direction);
+        this.animation.draw(this.x, this.y, 50, this.direction);
+
     }
 }
 
@@ -405,7 +471,7 @@ function updateBullets(){
     for(var i = bullets.length-1; i >= 0; i--){
         bullets[i].update();
         if(bullets[i].s < 0){
-          //  bullets.splice(i,1);
+            bullets.splice(i,1);
         }
     }
 }
