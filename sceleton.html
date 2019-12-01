@@ -426,6 +426,7 @@ Player = function(x, y, s, col){
 	}
 	this.playButtonHit = function(){
 	this.life = this.maxLife;
+		console.log(player.life);
 	}
 	
 }
@@ -579,22 +580,24 @@ var buttonH = 100;
     event.y < buttonY + buttonH
   ) {
     // Executes if button was clicked!
-    player.playButtonHit();
     
+	  console.log(event.x);
+	  player.playButtonHit();
+
   }
 });
 
-	if (player.life <= 0) {requestAnimationFrame(menuLoop);}
 	
 }
 	
 	
-	
-
-
 // RECURSIVE MAIN GAMELOOP
 function gameLoop(){
 	
+	if (player.life < 0) {
+		menuLoop();
+	}
+	else{
     clear("rgba(0, 0, 0, 1.0)");
 	backgroundDraw();
     // ALL UPDATE FUNCTION MUST COME BELOW THIS---------------
@@ -630,17 +633,15 @@ function gameLoop(){
 	health.draw();
 	//health.death();
     // ----------------------------------- End HUD
-	if (player.life > 0)requestAnimationFrame(gameLoop);
-	else requestAnimationFrame(menuLoop);
+	
+	}
+	
+	requestAnimationFrame(gameLoop);
 					 
 	
 }
 
-
-if (player.life > 0)
-	requestAnimationFrame(gameLoop);
-else requestAnimationFrame(menuLoop);
-					 
+		requestAnimationFrame(gameLoop);				 
 
 </script>
 </html>
