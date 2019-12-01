@@ -311,7 +311,7 @@ Civilian = function(x, y, s, col){
         var distanceToPlayer = dist(player, this);
         if(distanceToPlayer < this.deathRadius){
             this.isDead = true;   
-            player.life += 15; 
+            player.ate(); 
         }   
         this.animation.cycle();
 
@@ -357,7 +357,8 @@ Military = function(x, y, s, col){
         if(distanceToPlayer < this.deathRadius) { 
 		this.col = "red";
 		    player.ate();
-            this.isDead = true;									   
+            this.isDead = true;	
+            makeBlood(blood, this.x, this.y);								   
 		};       
 
     }
@@ -394,7 +395,7 @@ Player = function(x, y, s, col){
     this.s = s;
     this.direction = 0;
     this.turnSpd = 0.05;
-    this.walkSpd = 0.5;
+    this.walkSpd = 0.6;
     this.col = col;
     this.life = 100;
     this.maxLife = 100;
@@ -424,7 +425,7 @@ Player = function(x, y, s, col){
         this.animation.cycle(state); 
     }
 	this.ate = function(){
-		if (this.life <= this.maxLife) this.life +=1;
+		if (this.life <= this.maxLife) this.life +=15;
 	}
 	this.playButtonHit = function(){
 	this.life = this.maxLife;
@@ -525,6 +526,72 @@ function drawMilitary(){
     }
 }
 
+	
+		
+function backgroundDraw () {
+    C.drawImage(bgImage, 0, 0);
+}
+
+// Menu functions
+function menuLoop() {
+	C.drawImage(menuImage, 0, 0);
+	C.drawImage(button1, 50, 100);
+	C.drawImage(button2, 50, 220);
+	C.drawImage(button3, 50, 340);
+	
+	var buttonX = 50;
+	var buttonY = 100;
+	var buttonW = 200;
+	var buttonH = 100;
+
+	canvas.addEventListener('click', function(event) {
+  // Control that click event occurred within position of button
+  // NOTE: This assumes canvas element is positioned at top left corner 
+  if (
+        event.x > buttonX && 
+        event.x < buttonX + buttonW &&
+        event.y > buttonY && 
+        event.y < buttonY + buttonH
+  ) {
+    // Executes if button was clicked!
+    
+	  console.log(event.x);
+	  player.playButtonHit();
+	  score = 0;
+  }
+	});
+}
+function levelUp() { 
+	C.drawImage(transitionImage, 0, 0);
+	C.drawImage(button4, 500, 200);
+	 	
+	var buttonX = 500;
+	var buttonY = 200;
+	var buttonW = 200;
+	var buttonH = 100;
+
+	canvas.addEventListener('mouseup', function(event) {
+  	// Control that click event occurred within position of button
+  	// NOTE: This assumes canvas element is positioned at top left corner 
+  	if (
+        event.x > buttonX && 
+        event.x < buttonX + buttonW &&
+        event.y > buttonY && 
+        event.y < buttonY + buttonH
+  	) {
+    // Executes if button was clicked!
+    
+        player.walkSpd += 0.05;
+        active = false;
+        scoreReq += 1500;
+        console.log(scoreReq);
+  }
+ });
+	
+	
+	
+}
+
 // -----------------------------End Game functions
 
 // Game setup   ----------------------------
@@ -567,72 +634,6 @@ button3.src = "assets/exit.png";
 button4.src = "assets/speed.png";
 //---------------------------- End game setup
 	
-		
-function backgroundDraw () {
-    C.drawImage(bgImage, 0, 0);
-}
-
-function menuLoop() {
-
-	console.log("omggg")
-	C.drawImage(menuImage, 0, 0);
-	C.drawImage(button1, 50, 100);
-	C.drawImage(button2, 50, 220);
-	C.drawImage(button3, 50, 340);
-	
-	var buttonX = 50;
-	var buttonY = 100;
-	var buttonW = 200;
-	var buttonH = 100;
-
-	canvas.addEventListener('click', function(event) {
-  // Control that click event occurred within position of button
-  // NOTE: This assumes canvas element is positioned at top left corner 
-  if (
-    event.x > buttonX && 
-    event.x < buttonX + buttonW &&
-    event.y > buttonY && 
-    event.y < buttonY + buttonH
-  ) {
-    // Executes if button was clicked!
-    
-	  console.log(event.x);
-	  player.playButtonHit();
-	  score = 0;
-  }
-	});
-}
- function levelUp() { 
-	  C.drawImage(transitionImage, 0, 0);
-	 C.drawImage(button4, 500, 200);
-	 	
-	var buttonX = 500;
-	var buttonY = 200;
-	var buttonW = 200;
-	var buttonH = 100;
-
-	canvas.addEventListener('mouseup', function(event) {
-  	// Control that click event occurred within position of button
-  	// NOTE: This assumes canvas element is positioned at top left corner 
-  	if (
-    event.x > buttonX && 
-    event.x < buttonX + buttonW &&
-    event.y > buttonY && 
-    event.y < buttonY + buttonH
-  	) {
-    // Executes if button was clicked!
-    
-	player.walkSpd += 0.01;
-	active = false;
-	scoreReq += 1500;
-	console.log(scoreReq);
-  }
- });
-	
-	
-	
-}
-	
 	
 // RECURSIVE MAIN GAMELOOP
 function gameLoop(){
@@ -640,7 +641,7 @@ function gameLoop(){
 	if (player.life < 0) {
 		menuLoop();
 	}
-	else{
+	else if (!active){
 
     	clear("rgba(0, 0, 0, 1.0)");
 		backgroundDraw();
@@ -681,9 +682,8 @@ function gameLoop(){
 		if(active) { levelUp(); }
 
 	}
-	if (!active){
-		requestAnimationFrame(gameLoop);
-	}	 
+
+	requestAnimationFrame(gameLoop);	 
 	
 }
 
