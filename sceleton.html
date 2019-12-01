@@ -6,7 +6,7 @@
 FINAL Idea = Zombie evolves, and people get stronger, topdown
 */
 
-var ctx = canvas.getContext("2d");
+
 	
 const CANVAS = document.getElementById("canvas");
 const C = CANVAS.getContext("2d");
@@ -16,6 +16,9 @@ const H = CANVAS.height; // window HEIGHT
 // Controller stuff-------------------------------
 document.addEventListener("keydown", keyboard);
 document.addEventListener("keyup", keyboard);
+	
+
+	
 
 var key = {
     w:false,
@@ -66,9 +69,9 @@ function cameraFollow(target){
 
 	
 	function drawScore() {
-    ctx.font = "16px Arial";
-    ctx.fillStyle = "#0095DD";
-    ctx.fillText("Score: "+score, 150, 30);
+    C.font = "16px Arial";
+    C.fillStyle = "#0095DD";
+    C.fillText("Score: "+score, 150, 30);
 }
 	
 	
@@ -274,6 +277,10 @@ Player = function(x, y, s, col){
 	this.ate = function(){
 		if (this.life <= this.maxLife) this.life +=1;
 	}
+	this.playButtonHit = function(){
+	this.life = this.maxLife;
+	}
+	
 }
 
 Healthbar = function(len, col) {
@@ -284,9 +291,9 @@ Healthbar = function(len, col) {
 		drawRect(15, 15, player.maxLife + 10, 30, "cyan");
 		drawRect(20,20, player.life, 20, this.col)
 	}
-	this.death = function () {
-		if (player.life == 0){ alert("game over");	}	
-}}
+
+}
+
 
 Sound = function sound(src) {
   this.sound = document.createElement("audio");
@@ -365,18 +372,84 @@ var blood = [];
 var bullets = [];
 var health = new Healthbar(100, "green");
 var score = 0;
+
 	// var sound = new Sound("hitSound.mp3");	// mySound.play(); to play when player hits/eats object
 var music = new Sound("assets/wargod.mp3");
 music.play();
-	
 
 	
+var mouseX;
+var mouseY;
+	
+var bgImage = new Image();
+var menuImage = new Image();
+var transitionImage = new Image();
+var button1 = new Image();
+var button2 = new Image();
+var button3 = new Image();
+
+bgImage.src = "assets/background.png";
+menuImage.src = "assets/menu.png";
+transitionImage.src = "assets/transition.png";
+button1.src = "assets/play.png";
+button2.src = "assets/set.png";
+button3.src = "assets/exit.png";	
+	
 //---------------------------- End game setup
+	
+function menuDraw () {
+    C.drawImage(menuImage, 0, 0);
+}
+		
+function backgroundDraw () {
+    C.drawImage(bgImage, 0, 0);
+}
+
+function transitionDraw () {
+    C.drawImage(transitionImage, 0, 0);
+}
+	
+function menuLoop() {
+
+	console.log("omggg")
+	menuDraw ();
+	C.drawImage(button1, 50, 100);
+	C.drawImage(button2, 50, 220);
+	C.drawImage(button3, 50, 340);
+	
+var buttonX = 50;
+var buttonY = 100;
+var buttonW = 200;
+var buttonH = 100;
+
+	canvas.addEventListener('click', function(event) {
+  // Control that click event occurred within position of button
+  // NOTE: This assumes canvas element is positioned at top left corner 
+  if (
+    event.x > buttonX && 
+    event.x < buttonX + buttonW &&
+    event.y > buttonY && 
+    event.y < buttonY + buttonH
+  ) {
+    // Executes if button was clicked!
+    player.playButtonHit();
+    
+  }
+});
+
+	if (player.life <= 0) {requestAnimationFrame(menuLoop);}
+	
+}
+	
+	
+	
+
 
 // RECURSIVE MAIN GAMELOOP
 function gameLoop(){
+	
     clear("rgba(0, 0, 0, 1.0)");
-
+	backgroundDraw();
     // ALL UPDATE FUNCTION MUST COME BELOW THIS---------------
     player.update();
     updateCivilians();
@@ -410,13 +483,17 @@ function gameLoop(){
 	health.draw();
 	//health.death();
     // ----------------------------------- End HUD
-    requestAnimationFrame(gameLoop);
+	if (player.life > 0)requestAnimationFrame(gameLoop);
+	else requestAnimationFrame(menuLoop);
+					 
+	
 }
 
 
-
-requestAnimationFrame(gameLoop);
-
+if (player.life > 0)
+	requestAnimationFrame(gameLoop);
+else requestAnimationFrame(menuLoop);
+					 
 
 </script>
 </html>
