@@ -335,6 +335,7 @@ Military = function(x, y, s, col){
     this.fireRate = 0;
     this.shootThreshhold = Math.random()*50;
     this.deathRadius = this.s*0.6;
+    this.idDead = false;
 
     this.update = function(){
         if(this.shootTimer < 200){
@@ -355,7 +356,8 @@ Military = function(x, y, s, col){
         var distanceToPlayer = dist(player, this);
         if(distanceToPlayer < this.deathRadius) { 
 		this.col = "red";
-		player.ate();									   
+		    player.ate();
+            this.isDead = true;									   
 		};       
 
     }
@@ -490,6 +492,15 @@ function updateBullets(){
     }
 }
 
+function updateMilitary(){
+    for(var i = militaryBoys.length-1; i >= 0; i--){
+        militaryBoys[i].update();
+        if(militaryBoys[i].isDead){
+            militaryBoys.splice(i,1);
+        }
+    }
+}
+
 function drawCivilians(){
     for(var i in civilians)	
         civilians[i].draw();
@@ -508,13 +519,21 @@ function drawBullets(){
     }
 }
 
+function drawMilitary(){
+    for(var i in militaryBoys){
+        militaryBoys[i].draw();
+    }
+}
+
 // -----------------------------End Game functions
 
 // Game setup   ----------------------------
 
 var player = new Player(200, 200, 20, "cyan");
 var civilians = generateCivilians(30);
-var militaryBoy = new Military(300, 300, 20, "lightgreen");
+var militaryBoys = [
+    new Military(300, 300, 20, "lightgreen")
+];
 
 var blood = [];
 var bullets = [];
@@ -622,12 +641,13 @@ function gameLoop(){
 		menuLoop();
 	}
 	else{
+
     	clear("rgba(0, 0, 0, 1.0)");
 		backgroundDraw();
     	// ALL UPDATE FUNCTION MUST COME BELOW THIS---------------
 		player.update();
 		updateCivilians();
-		militaryBoy.update();
+		updateMilitary();
 		updateBlood();
 		updateBullets();
 
@@ -642,7 +662,7 @@ function gameLoop(){
 		// demonstrate the draw functions
 		player.draw();
 		drawCivilians();
-		militaryBoy.draw();
+		drawMilitary();
 		drawBlood();
 		drawBullets();
 		drawRect(500, 200, 400, 20, "green");
@@ -659,6 +679,7 @@ function gameLoop(){
 		// ----------------------------------- End HUD
 		if(score == scoreReq) { active = true; }
 		if(active) { levelUp(); }
+
 	}
 	if (!active){
 		requestAnimationFrame(gameLoop);
@@ -666,7 +687,7 @@ function gameLoop(){
 	
 }
 
-		requestAnimationFrame(gameLoop);				 
+requestAnimationFrame(gameLoop);				 
 
 </script>
 </html>
