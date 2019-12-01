@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<canvas id="canvas" width="1024" height="512"/>
+<script>
+
+const CANVAS = document.getElementById("canvas");
+const C = CANVAS.getContext("2d");
+
+function clear(){
+    C.fillStyle = "black";
+    C.fillRect(0, 0, CANVAS.width, CANVAS.height);
+}
+
+SpriteSheet = function(){
+    this.img = new Image();
+    this.img.src = "./assets/sprites/human/walk.png";
+    this.s = 64;
+    this.xx = 0;
+    this.yy = 0;
+    this.currentFrame = 0;
+    this.interval = 0;
+    this.maxFrame = 7;
+    this.threshhold = 5;
+  //  this.currentPos = {x:0, y:0};
+    this.arr = [
+        [{x:0, y:0}, {x:64, y:0}, {x:64*2, y:0}],
+        [{x:0, y:64}, {x:64, y:64}, {x:64*2, y:64}],
+        [{x:0, y:64*2}, {x:64, y:64*2}]
+    ];
+
+    this.cycles = [];
+
+    this.load = function(){
+        for(var i = 0; i < 3; i++){
+            for(var j = 0; j < this.arr[i].length; j++){
+                this.cycles.push(this.arr[i][j]);
+            }
+        }
+    }
+
+    this.cycle = function(){
+        if(this.interval > this.threshhold){
+            this.currentFrame++;
+            this.interval = 0;
+        }
+        if(this.currentFrame > this.maxFrame) this.currentFrame = 0;
+        this.interval++;
+    }
+
+    this.draw = function(){
+        C.drawImage(
+            this.img, 
+            this.cycles[this.currentFrame].x, 
+            this.cycles[this.currentFrame].y,
+            this.s,
+            this.s,
+            0,
+            0,
+            60,
+            60
+        );
+    }
+}
+
+var spr = new SpriteSheet();
+spr.load();
+
+function update()
+{
+	clear();
+	spr.cycle();
+    spr.draw();
+
+	requestAnimationFrame(update);
+}
+
+
+update();
+
+</script>
+</html>
